@@ -1,0 +1,24 @@
+{
+    "name": "GANESHRAYKAR IST Clock",
+    "short_name": "GR Clock",
+    "description": "Personalized analog clock with IST time - PWA screensaver",
+    "start_url": "/",
+    "display": "fullscreen",
+    "background_color": "#000000",
+    "theme_color": "#1c2731",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
