@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GANESHRAYKAR IST Clock PWA</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1c2731">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+        #clock-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #clock {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(170deg, rgba(49,57,73,0.8) 20%, rgba(49,57,73,0.5) 35%, rgba(41,48,61,0.8) 45%, rgba(31,36,46,0.8) 75%), linear-gradient(45deg, rgba(20,24,31,0.8) 0%, rgba(41,48,61,0.8) 50%, rgba(82,95,122,0.8) 100%) #313949;
+            position: relative;
+        }
+        .letter {
+            position: absolute;
+            font-size: 22px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            transform-origin: center 110px;
+        }
+        .letter-0 { transform: rotate(0deg) translateY(-110px) rotate(0deg); }
+        .letter-1 { transform: rotate(30deg) translateY(-110px) rotate(-30deg); }
+        .letter-2 { transform: rotate(60deg) translateY(-110px) rotate(-60deg); }
+        .letter-3 { transform: rotate(90deg) translateY(-110px) rotate(-90deg); }
+        .letter-4 { transform: rotate(120deg) translateY(-110px) rotate(-120deg); }
+        .letter-5 { transform: rotate(150deg) translateY(-110px) rotate(-150deg); }
+        .letter-6 { transform: rotate(180deg) translateY(-110px) rotate(-180deg); }
+        .letter-7 { transform: rotate(210deg) translateY(-110px) rotate(-210deg); }
+        .letter-8 { transform: rotate(240deg) translateY(-110px) rotate(-240deg); }
+        .letter-9 { transform: rotate(270deg) translateY(-110px) rotate(-270deg); }
+        .letter-10 { transform: rotate(300deg) translateY(-110px) rotate(-300deg); }
+        .letter-11 { transform: rotate(330deg) translateY(-110px) rotate(-330deg); }
+        .dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(255,255,255,0.6);
+            transform-origin: center 90px;
+        }
+        .dot-0 { transform: rotate(0deg) translateY(-90px) rotate(0deg); }
+        .dot-1 { transform: rotate(90deg) translateY(-90px) rotate(-90deg); }
+        .dot-2 { transform: rotate(180deg) translateY(-90px) rotate(-180deg); }
+        .dot-3 { transform: rotate(270deg) translateY(-90px) rotate(-270deg); }
+        #clock::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fff;
+            z-index: 2;
+            opacity: 0.6;
+        }
+        #clock .hand {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            transition: transform 0.05s cubic-bezier(0.23, 1, 0.320, 1);
+        }
+        #clock .hand i {
+            position: absolute;
+            background: var(--color);
+            width: var(--width);
+            height: var(--height);
+            border-radius: 8px;
+        }
+        #time-display {
+            position: absolute;
+            top: 20px;
+            color: #fff;
+            font-size: 18px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        @media (orientation: landscape) {
+            #clock { width: 250px; height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="clock-container">
+        <div id="time-display">IST: Loading...</div>
+        <div id="clock">
+            <div class="dot dot-0"></div>
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+            <div class="letter letter-0">G</div>
+            <div class="letter letter-1">A</div>
+            <div class="letter letter-2">N</div>
+            <div class="letter letter-3">E</div>
+            <div class="letter letter-4">S</div>
+            <div class="letter letter-5">H</div>
+            <div class="letter letter-6">R</div>
+            <div class="letter letter-7">A</div>
+            <div class="letter letter-8">Y</div>
+            <div class="letter letter-9">K</div>
+            <div class="letter letter-10">A</div>
+            <div class="letter letter-11">R</div>
+            <div id="hour" class="hand" style="--color: #ff3d58; --height: 76px; --width: 4px;"><i></i></div>
+            <div id="minute" class="hand" style="--color: #00a6ff; --height: 86px; --width: 3px;"><i></i></div>
+            <div id="second" class="hand" style="--color: #ffffff; --height: 96px; --width: 2px;"><i></i></div>
+        </div>
+    </div>
+    <script>
+        let wakeLock = null;
+        
+        function updateClock() {
+            const now = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+            const timeStr = now.split(', ')[1];
+            document.getElementById('time-display').textContent = `IST: ${timeStr}`;
+            
+            const [hourStr, minStr, secStr] = timeStr.split(':');
+            const hour = parseInt(hourStr) % 12;
+            const minute = parseInt(minStr);
+            const second = parseInt(secStr);
+            
+            document.getElementById('hour').style.transform = `rotate(${30 * hour + minute / 2}deg)`;
+            document.getElementById('minute').style.transform = `rotate(${6 * minute}deg)`;
+            document.getElementById('second').style.transform = `rotate(${6 * second}deg)`;
+        }
+        
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator && !wakeLock) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock active - Screen saver mode');
+                } catch (err) {
+                    console.log('Wake Lock denied:', err.message);
+                }
+            }
+        }
+        
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && wakeLock) {
+                try {
+                    await wakeLock.release();
+                    wakeLock = null;
+                } catch (err) {
+                    console.log('Wake Lock release error:', err);
+                }
+            }
+        });
+        
+        // Tap to toggle wake lock (screensaver mode)
+        document.addEventListener('click', requestWakeLock);
+        document.addEventListener('touchstart', requestWakeLock);
+        
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
